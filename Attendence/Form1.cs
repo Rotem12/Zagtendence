@@ -147,6 +147,9 @@ namespace Attendence
                                 n = split[index].ToLower();
                             }
 
+                            if (n[0] == '2') n = "z" + n.Remove(0,1);
+                            n = n.Replace("|", "l");
+
                             int min = 50;
                             string selected = "none";
 
