@@ -18,6 +18,8 @@ namespace Attendence
         private ScreenCapture objScreenCapture;
         private List<string> attended;
 
+        private bool fullList = false;
+
         public Form1()
         {
             InitializeComponent();
@@ -157,7 +159,8 @@ namespace Attendence
                             {
 
                                 int i = LevenshteinDistance.Compute(n, family.ToLower());
-                                if (i < min && i + 1 < family.Length && Math.Abs(family.Length - n.Length) <= 2)
+                                int diff = Math.Abs(family.Length - n.Length);
+                                if (i < min && i + 2 < family.Length && diff <= 2 && i < 8)
                                 {
                                     min = i;
                                     selected = family;
@@ -187,6 +190,7 @@ namespace Attendence
 
                     labelCount.Text = attended.Count.ToString();
                     textBoxResult.Text = sb.ToString();
+                    UpdateFull();
                 }
             }
         }
@@ -203,6 +207,10 @@ namespace Attendence
             }
 
             textBoxResult.Text = sb.ToString();
+
+            buttonToggleList.Text = "Recent";
+            textBoxResult.BringToFront();
+            fullList = false;
         }
 
         public Bitmap GreyScaleFilter(Bitmap image)
@@ -269,6 +277,7 @@ namespace Attendence
             attended.Clear();
             labelCount.Text = "0";
             textBoxResult.Clear();
+            textBoxFull.Clear();
         }
 
         private void buttonOopsClear_Click(object sender, EventArgs e)
@@ -279,6 +288,67 @@ namespace Attendence
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             SaveSettings();
+        }
+
+        private void buttonToggleList_Click(object sender, EventArgs e)
+        {
+            if (fullList)
+            {
+                buttonToggleList.Text = "Recent";
+                textBoxResult.BringToFront();
+            }
+            else
+            {
+                buttonToggleList.Text = "Full";
+                textBoxFull.BringToFront();
+            }
+
+            fullList = !fullList;
+        }
+
+        private void UpdateFull()
+        {
+            textBoxFull.Clear();
+            textBoxFull.Text = string.Join(Environment.NewLine, attended);
+        }
+
+        private void textBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
+            {
+                TextBox txt = sender as TextBox;
+                int charIndex = txt.GetFirstCharIndexOfCurrentLine();
+                int lineNo = txt.GetLineFromCharIndex(charIndex);
+
+                string name = txt.Lines[lineNo];
+                if (attended.Contains(name))
+                {
+                    attended.Remove(name);
+                    txt.Text = txt.Text.Substring(0, charIndex) + txt.Text.Substring(charIndex + name.Length);
+                    txt.Text = txt.Text.Replace("\r\n\r\n", "\r\n");
+
+                    labelCount.Text = attended.Count.ToString();
+
+                    if(txt != textBoxFull)
+                    {
+                        int i = textBoxFull.Text.IndexOf(name);
+                        if(i != -1)
+                        {
+                            textBoxFull.Text = textBoxFull.Text.Substring(0, i) + textBoxFull.Text.Substring(i + name.Length);
+                            textBoxFull.Text = textBoxFull.Text.Replace("\r\n\r\n", "\r\n");
+                        }
+                    }
+                    else
+                    {
+                        int i = textBoxResult.Text.IndexOf(name);
+                        if (i != -1)
+                        {
+                            textBoxResult.Text = textBoxResult.Text.Substring(0, i) + textBoxResult.Text.Substring(i + name.Length);
+                            textBoxResult.Text = textBoxResult.Text.Replace("\r\n\r\n", "\r\n");
+                        }
+                    }
+                }
+            }
         }
     }
 }

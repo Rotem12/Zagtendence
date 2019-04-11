@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.captureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -42,6 +43,9 @@
             this.pictureBoxSS = new System.Windows.Forms.PictureBox();
             this.checkBoxGrey = new System.Windows.Forms.CheckBox();
             this.checkBoxSaveSS = new System.Windows.Forms.CheckBox();
+            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.buttonToggleList = new System.Windows.Forms.Button();
+            this.textBoxFull = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSS)).BeginInit();
             this.SuspendLayout();
@@ -84,6 +88,7 @@
             this.textBoxResult.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBoxResult.Size = new System.Drawing.Size(173, 225);
             this.textBoxResult.TabIndex = 8;
+            this.textBoxResult.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox1_KeyDown);
             // 
             // label1
             // 
@@ -105,22 +110,24 @@
             // 
             // buttonClipboard
             // 
-            this.buttonClipboard.Location = new System.Drawing.Point(0, 72);
+            this.buttonClipboard.Image = global::Attendence.Properties.Resources.iconfinder_clipboard_sign_out_25957;
+            this.buttonClipboard.Location = new System.Drawing.Point(94, 71);
             this.buttonClipboard.Name = "buttonClipboard";
-            this.buttonClipboard.Size = new System.Drawing.Size(75, 23);
+            this.buttonClipboard.Size = new System.Drawing.Size(25, 25);
             this.buttonClipboard.TabIndex = 11;
-            this.buttonClipboard.Text = "To Clipboard";
+            this.toolTip.SetToolTip(this.buttonClipboard, "Copy To Clipboard");
             this.buttonClipboard.UseVisualStyleBackColor = true;
             this.buttonClipboard.Click += new System.EventHandler(this.buttonClipboard_Click);
             // 
             // buttonClear
             // 
             this.buttonClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonClear.Location = new System.Drawing.Point(121, 72);
+            this.buttonClear.Location = new System.Drawing.Point(121, 71);
             this.buttonClear.Name = "buttonClear";
-            this.buttonClear.Size = new System.Drawing.Size(53, 23);
+            this.buttonClear.Size = new System.Drawing.Size(53, 25);
             this.buttonClear.TabIndex = 12;
             this.buttonClear.Text = "Clear";
+            this.toolTip.SetToolTip(this.buttonClear, "Clear Attendence List");
             this.buttonClear.UseVisualStyleBackColor = true;
             this.buttonClear.Click += new System.EventHandler(this.buttonClear_Click);
             // 
@@ -139,11 +146,12 @@
             // buttonOopsClear
             // 
             this.buttonOopsClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonOopsClear.Location = new System.Drawing.Point(303, 72);
+            this.buttonOopsClear.Location = new System.Drawing.Point(303, 71);
             this.buttonOopsClear.Name = "buttonOopsClear";
-            this.buttonOopsClear.Size = new System.Drawing.Size(53, 23);
+            this.buttonOopsClear.Size = new System.Drawing.Size(53, 25);
             this.buttonOopsClear.TabIndex = 14;
             this.buttonOopsClear.Text = "Clear";
+            this.toolTip.SetToolTip(this.buttonOopsClear, "Clear Garbage Text");
             this.buttonOopsClear.UseVisualStyleBackColor = true;
             this.buttonOopsClear.Click += new System.EventHandler(this.buttonOopsClear_Click);
             // 
@@ -180,11 +188,39 @@
             this.checkBoxSaveSS.Text = "Save Screenshot";
             this.checkBoxSaveSS.UseVisualStyleBackColor = true;
             // 
+            // buttonToggleList
+            // 
+            this.buttonToggleList.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonToggleList.Location = new System.Drawing.Point(0, 71);
+            this.buttonToggleList.Name = "buttonToggleList";
+            this.buttonToggleList.Size = new System.Drawing.Size(53, 25);
+            this.buttonToggleList.TabIndex = 18;
+            this.buttonToggleList.Text = "Recent";
+            this.toolTip.SetToolTip(this.buttonToggleList, "Display Full/Recent List");
+            this.buttonToggleList.UseVisualStyleBackColor = true;
+            this.buttonToggleList.Click += new System.EventHandler(this.buttonToggleList_Click);
+            // 
+            // textBoxFull
+            // 
+            this.textBoxFull.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxFull.BackColor = System.Drawing.Color.White;
+            this.textBoxFull.Location = new System.Drawing.Point(0, 96);
+            this.textBoxFull.Multiline = true;
+            this.textBoxFull.Name = "textBoxFull";
+            this.textBoxFull.ReadOnly = true;
+            this.textBoxFull.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBoxFull.Size = new System.Drawing.Size(173, 225);
+            this.textBoxFull.TabIndex = 19;
+            this.textBoxFull.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox1_KeyDown);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(356, 321);
+            this.Controls.Add(this.buttonToggleList);
             this.Controls.Add(this.checkBoxSaveSS);
             this.Controls.Add(this.checkBoxGrey);
             this.Controls.Add(this.pictureBoxSS);
@@ -196,6 +232,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBoxResult);
             this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.textBoxFull);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
@@ -225,6 +262,9 @@
         private System.Windows.Forms.PictureBox pictureBoxSS;
         private System.Windows.Forms.CheckBox checkBoxGrey;
         private System.Windows.Forms.CheckBox checkBoxSaveSS;
+        private System.Windows.Forms.ToolTip toolTip;
+        private System.Windows.Forms.Button buttonToggleList;
+        private System.Windows.Forms.TextBox textBoxFull;
     }
 }
 
