@@ -40,11 +40,11 @@ namespace Attendence
         {
             int x, y;
 
-            Screen screen = Screen.from()
+            Screen screen = Screen.FromPoint(Cursor.Position);
 
             return new Rectangle(
-                Left + Math.Min(startPos.X, currentPos.X),
-                Top + Math.Min(startPos.Y, currentPos.Y),
+                screen.Bounds.Left + Math.Min(startPos.X, currentPos.X),
+                screen.Bounds.Top + Math.Min(startPos.Y, currentPos.Y),
                 Math.Abs(startPos.X - currentPos.X),
                 Math.Abs(startPos.Y - currentPos.Y));
         }
