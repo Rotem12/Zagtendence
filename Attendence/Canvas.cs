@@ -38,8 +38,6 @@ namespace Attendence
 
         public Rectangle GetRectangle()
         {
-            int x, y;
-
             Screen screen = Screen.FromPoint(Cursor.Position);
 
             return new Rectangle(
