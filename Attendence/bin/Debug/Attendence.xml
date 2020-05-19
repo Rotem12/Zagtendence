@@ -1,4 +1,6 @@
 <Settings>
-  <Greyscale>False</Greyscale>
+  <Greyscale>True</Greyscale>
   <SaveScreenshot>False</SaveScreenshot>
+  <Tolerance>4</Tolerance>
+  <Scores>False</Scores>
 </Settings>

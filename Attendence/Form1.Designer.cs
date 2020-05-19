@@ -33,6 +33,7 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.captureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.getCopyPastaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copy2ColumnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.textBoxResult = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.labelCount = new System.Windows.Forms.Label();
@@ -41,20 +42,27 @@
             this.textBoxOops = new System.Windows.Forms.TextBox();
             this.buttonOopsClear = new System.Windows.Forms.Button();
             this.pictureBoxSS = new System.Windows.Forms.PictureBox();
-            this.checkBoxGrey = new System.Windows.Forms.CheckBox();
             this.checkBoxSaveSS = new System.Windows.Forms.CheckBox();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.buttonToggleList = new System.Windows.Forms.Button();
             this.textBoxFull = new System.Windows.Forms.TextBox();
+            this.numTolerance = new System.Windows.Forms.NumericUpDown();
+            this.label2 = new System.Windows.Forms.Label();
+            this.checkBoxGrey = new System.Windows.Forms.CheckBox();
+            this.checkBoxScores = new System.Windows.Forms.CheckBox();
+            this.scoresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSS)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numTolerance)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.captureToolStripMenuItem,
-            this.getCopyPastaToolStripMenuItem});
+            this.getCopyPastaToolStripMenuItem,
+            this.copy2ColumnToolStripMenuItem,
+            this.scoresToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(356, 24);
@@ -74,6 +82,13 @@
             this.getCopyPastaToolStripMenuItem.Size = new System.Drawing.Size(83, 20);
             this.getCopyPastaToolStripMenuItem.Text = "Get Column";
             this.getCopyPastaToolStripMenuItem.Click += new System.EventHandler(this.getCopyPastaToolStripMenuItem_Click);
+            // 
+            // copy2ColumnToolStripMenuItem
+            // 
+            this.copy2ColumnToolStripMenuItem.Name = "copy2ColumnToolStripMenuItem";
+            this.copy2ColumnToolStripMenuItem.Size = new System.Drawing.Size(103, 20);
+            this.copy2ColumnToolStripMenuItem.Text = "Add From Copy";
+            this.copy2ColumnToolStripMenuItem.Click += new System.EventHandler(this.copy2ColumnToolStripMenuItem_Click);
             // 
             // textBoxResult
             // 
@@ -166,22 +181,12 @@
             this.pictureBoxSS.TabIndex = 15;
             this.pictureBoxSS.TabStop = false;
             // 
-            // checkBoxGrey
-            // 
-            this.checkBoxGrey.AutoSize = true;
-            this.checkBoxGrey.Location = new System.Drawing.Point(101, 44);
-            this.checkBoxGrey.Name = "checkBoxGrey";
-            this.checkBoxGrey.Size = new System.Drawing.Size(101, 17);
-            this.checkBoxGrey.TabIndex = 16;
-            this.checkBoxGrey.Text = "Greyscale Scan";
-            this.checkBoxGrey.UseVisualStyleBackColor = true;
-            // 
             // checkBoxSaveSS
             // 
             this.checkBoxSaveSS.AutoSize = true;
             this.checkBoxSaveSS.Checked = true;
             this.checkBoxSaveSS.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxSaveSS.Location = new System.Drawing.Point(208, 44);
+            this.checkBoxSaveSS.Location = new System.Drawing.Point(236, 53);
             this.checkBoxSaveSS.Name = "checkBoxSaveSS";
             this.checkBoxSaveSS.Size = new System.Drawing.Size(108, 17);
             this.checkBoxSaveSS.TabIndex = 17;
@@ -215,11 +220,72 @@
             this.textBoxFull.TabIndex = 19;
             this.textBoxFull.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox1_KeyDown);
             // 
+            // numTolerance
+            // 
+            this.numTolerance.Location = new System.Drawing.Point(256, 73);
+            this.numTolerance.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numTolerance.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numTolerance.Name = "numTolerance";
+            this.numTolerance.Size = new System.Drawing.Size(41, 20);
+            this.numTolerance.TabIndex = 20;
+            this.numTolerance.Value = new decimal(new int[] {
+            8,
+            0,
+            0,
+            0});
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(196, 75);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(58, 13);
+            this.label2.TabIndex = 21;
+            this.label2.Text = "Tolerance:";
+            // 
+            // checkBoxGrey
+            // 
+            this.checkBoxGrey.AutoSize = true;
+            this.checkBoxGrey.Location = new System.Drawing.Point(236, 37);
+            this.checkBoxGrey.Name = "checkBoxGrey";
+            this.checkBoxGrey.Size = new System.Drawing.Size(101, 17);
+            this.checkBoxGrey.TabIndex = 16;
+            this.checkBoxGrey.Text = "Greyscale Scan";
+            this.checkBoxGrey.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxScores
+            // 
+            this.checkBoxScores.AutoSize = true;
+            this.checkBoxScores.Location = new System.Drawing.Point(140, 37);
+            this.checkBoxScores.Name = "checkBoxScores";
+            this.checkBoxScores.Size = new System.Drawing.Size(87, 17);
+            this.checkBoxScores.TabIndex = 22;
+            this.checkBoxScores.Text = "Scan Scores";
+            this.checkBoxScores.UseVisualStyleBackColor = true;
+            // 
+            // scoresToolStripMenuItem
+            // 
+            this.scoresToolStripMenuItem.Name = "scoresToolStripMenuItem";
+            this.scoresToolStripMenuItem.Size = new System.Drawing.Size(74, 20);
+            this.scoresToolStripMenuItem.Text = "Get Scores";
+            this.scoresToolStripMenuItem.Click += new System.EventHandler(this.scoresToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(356, 321);
+            this.Controls.Add(this.checkBoxScores);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.numTolerance);
             this.Controls.Add(this.buttonToggleList);
             this.Controls.Add(this.checkBoxSaveSS);
             this.Controls.Add(this.checkBoxGrey);
@@ -236,12 +302,13 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
-            this.Text = "Attendence - V1.0.2";
+            this.Text = "Attendence - V1.0.5";
             this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSS)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numTolerance)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -260,11 +327,16 @@
         private System.Windows.Forms.TextBox textBoxOops;
         private System.Windows.Forms.Button buttonOopsClear;
         private System.Windows.Forms.PictureBox pictureBoxSS;
-        private System.Windows.Forms.CheckBox checkBoxGrey;
         private System.Windows.Forms.CheckBox checkBoxSaveSS;
         private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.Button buttonToggleList;
         private System.Windows.Forms.TextBox textBoxFull;
+        private System.Windows.Forms.NumericUpDown numTolerance;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ToolStripMenuItem copy2ColumnToolStripMenuItem;
+        private System.Windows.Forms.CheckBox checkBoxGrey;
+        private System.Windows.Forms.CheckBox checkBoxScores;
+        private System.Windows.Forms.ToolStripMenuItem scoresToolStripMenuItem;
     }
 }
 

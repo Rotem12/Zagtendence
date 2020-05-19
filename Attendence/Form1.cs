@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-using CnetSDK.OCR.Trial;
 using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
+using Tesseract;
 
 namespace Attendence
 {
@@ -16,7 +16,7 @@ namespace Attendence
         public static string DirectoryPath;
 
         private ScreenCapture objScreenCapture;
-        private List<string> attended;
+        private Dictionary<string, string> attended;
 
         private bool fullList = false;
 
@@ -29,7 +29,7 @@ namespace Attendence
             objScreenCapture = new ScreenCapture();
 
             DirectoryPath = Path.GetDirectoryName(Application.ExecutablePath) + "\\";
-            attended = new List<string>();
+            attended = new Dictionary<string, string>();
 
             LoadSettings();
         }
@@ -42,6 +42,8 @@ namespace Attendence
 
                 checkBoxGrey.Checked = xml.Get("Greyscale", "false").ToLower() == "true";
                 checkBoxSaveSS.Checked = xml.Get("SaveScreenshot", "true").ToLower() == "true";
+                numTolerance.Value = int.Parse(xml.Get("Tolerance", "8"));
+                checkBoxScores.Checked = xml.Get("Scores", "false").ToLower() == "true";
             }
         }
 
@@ -53,6 +55,8 @@ namespace Attendence
 
                 xml.Set("Greyscale", checkBoxGrey.Checked.ToString());
                 xml.Set("SaveScreenshot", checkBoxSaveSS.Checked.ToString());
+                xml.Set("Tolerance", numTolerance.Value.ToString());
+                xml.Set("Scores", checkBoxScores.Checked.ToString());
 
                 xml.Save();
             }
@@ -69,7 +73,7 @@ namespace Attendence
                     Directory.CreateDirectory(DirectoryPath + "Screenshots");
                 }
 
-                string date = DateTime.Now.ToString("ddd dd_MM");
+                string date = DateTime.Now.ToString("dd_MM ddd");
 
                 if (!Directory.Exists(DirectoryPath + "Screenshots\\" + date))
                 {
@@ -81,27 +85,27 @@ namespace Attendence
                 snap.Save(DirectoryPath + "Screenshots\\" + date + "\\" + time + ".png");
             }
 
-            if(checkBoxGrey.Checked)
+            snap = ResizeImage(snap, snap.Width * 4, snap.Height * 4);
+
+            if (checkBoxGrey.Checked)
             {
                 snap = GreyScaleFilter(snap);
             }
 
-            pictureBoxSS.Image = snap;
+            snap = AdjustContrast(snap, 100);
 
-            snap = ResizeImage(snap, snap.Width * 4, snap.Height * 4);
+            pictureBoxSS.Image = snap;
 
             if (snap != null)
             {
-                 OcrEngine engine = new OcrEngine();
-
-                engine.TessDataPath = DirectoryPath + "tessdata";
-                engine.TextLanguage = "eng";
-                engine.RecognizeArea = new Rectangle(0, 0, snap.Width, snap.Height);
+                TesseractEngine engine = new TesseractEngine(DirectoryPath + "tessdata", "eng", EngineMode.Default);
+                engine.DefaultPageSegMode = PageSegMode.SingleBlock;
 
                 string ImageText;
                 try
                 {
-                    ImageText = engine.PerformOCR(snap);
+                    Page page = engine.Process(snap);
+                    ImageText = page.GetText();
                 }
                 catch
                 {
@@ -109,9 +113,9 @@ namespace Attendence
                     return;
                 }
 
-                if (ImageText.StartsWith("CnetSDK*"))
+                if (ImageText != "" && ImageText.Length > 0)
                 {
-                    string[] lines = ImageText.Remove(0, 8).Split('\n');
+                    string[] lines = ImageText.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
                     List<string> familys = File.ReadAllLines(DirectoryPath + "Data\\FamilyNames.txt").ToList();
 
@@ -160,7 +164,7 @@ namespace Attendence
 
                                 int i = LevenshteinDistance.Compute(n, family.ToLower());
                                 int diff = Math.Abs(family.Length - n.Length);
-                                if (i < min && i + 2 < family.Length && diff <= 2 && i < 8)
+                                if (i < min && i + 2 < family.Length && diff <= 2 && i < numTolerance.Value)
                                 {
                                     min = i;
                                     selected = family;
@@ -172,12 +176,31 @@ namespace Attendence
                             if (selected != "none")
                             {
                                 familys.Remove(selected);
-                                if (!attended.Contains(selected))
+                                if (!attended.ContainsKey(selected))
                                 {
-                                    attended.Add(selected);
+                                    if (checkBoxScores.Checked)
+                                    {
+                                        string[] scores = fixedLine.Split(')');
+                                        if (scores.Length > 1)
+                                        {
+                                            attended.Add(selected, scores[1].Trim().ToLower().Replace("o", "0").Replace("s", "5").Replace(" ", "\t"));
+                                        }
+                                        else
+                                        {
+                                            attended.Add(selected, "0\t0\t0\t0\t0\t0\t0\t0");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        attended.Add(selected, "0\t0\t0\t0\t0\t0\t0\t0");
+                                    }
                                     sb.AppendLine(selected);
 
                                     if (--max <= 0) break;
+                                }
+                                else
+                                {
+                                    textBoxOops.AppendText("Already in: " + line + Environment.NewLine);
                                 }
                             }
                             else
@@ -202,8 +225,7 @@ namespace Attendence
             StringBuilder sb = new StringBuilder();
             foreach (string f in familys)
             {
-                sb.AppendLine(attended.Contains(f) ? "TRUE" : "FALSE");
-                attended.Remove(f);
+                sb.AppendLine(attended.ContainsKey(f) ? "TRUE" : "FALSE");
             }
 
             textBoxResult.Text = sb.ToString();
@@ -211,6 +233,61 @@ namespace Attendence
             buttonToggleList.Text = "Recent";
             textBoxResult.BringToFront();
             fullList = false;
+        }
+
+        public static Bitmap AdjustContrast(Bitmap Image, float Value)
+        {
+            Value = (100.0f + Value) / 100.0f;
+            Value *= Value;
+            Bitmap NewBitmap = (Bitmap)Image.Clone();
+            BitmapData data = NewBitmap.LockBits(
+                new Rectangle(0, 0, NewBitmap.Width, NewBitmap.Height),
+                ImageLockMode.ReadWrite,
+                NewBitmap.PixelFormat);
+            int Height = NewBitmap.Height;
+            int Width = NewBitmap.Width;
+
+            unsafe
+            {
+                for (int y = 0; y < Height; ++y)
+                {
+                    byte* row = (byte*)data.Scan0 + (y * data.Stride);
+                    int columnOffset = 0;
+                    for (int x = 0; x < Width; ++x)
+                    {
+                        byte B = row[columnOffset];
+                        byte G = row[columnOffset + 1];
+                        byte R = row[columnOffset + 2];
+
+                        float Red = R / 255.0f;
+                        float Green = G / 255.0f;
+                        float Blue = B / 255.0f;
+                        Red = (((Red - 0.5f) * Value) + 0.5f) * 255.0f;
+                        Green = (((Green - 0.5f) * Value) + 0.5f) * 255.0f;
+                        Blue = (((Blue - 0.5f) * Value) + 0.5f) * 255.0f;
+
+                        int iR = (int)Red;
+                        iR = iR > 255 ? 255 : iR;
+                        iR = iR < 0 ? 0 : iR;
+                        int iG = (int)Green;
+                        iG = iG > 255 ? 255 : iG;
+                        iG = iG < 0 ? 0 : iG;
+                        int iB = (int)Blue;
+                        iB = iB > 255 ? 255 : iB;
+                        iB = iB < 0 ? 0 : iB;
+
+                        row[columnOffset] = (byte)iB;
+                        row[columnOffset + 1] = (byte)iG;
+                        row[columnOffset + 2] = (byte)iR;
+
+                        columnOffset += 4;
+                    }
+                }
+            }
+
+            NewBitmap.UnlockBits(data);
+
+            return NewBitmap;
         }
 
         public Bitmap GreyScaleFilter(Bitmap image)
@@ -309,7 +386,7 @@ namespace Attendence
         private void UpdateFull()
         {
             textBoxFull.Clear();
-            textBoxFull.Text = string.Join(Environment.NewLine, attended);
+            textBoxFull.Text = string.Join(Environment.NewLine, attended.Keys);
         }
 
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
@@ -321,7 +398,7 @@ namespace Attendence
                 int lineNo = txt.GetLineFromCharIndex(charIndex);
 
                 string name = txt.Lines[lineNo];
-                if (attended.Contains(name))
+                if (attended.ContainsKey(name))
                 {
                     attended.Remove(name);
                     txt.Text = txt.Text.Substring(0, charIndex) + txt.Text.Substring(charIndex + name.Length);
@@ -349,6 +426,49 @@ namespace Attendence
                     }
                 }
             }
+        }
+
+        private void copy2ColumnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (Clipboard.ContainsText(TextDataFormat.Text))
+            {
+                string clipboardText = Clipboard.GetText(TextDataFormat.Text);
+
+                string[] familys = clipboardText.Replace("\r", "").Split('\n');
+
+                foreach (string f in familys)
+                {
+                    attended.Add(f, "0\t0\t0\t0\t0\t0\t0\t0");
+                }
+
+                labelCount.Text = attended.Count.ToString();
+                textBoxResult.Text = clipboardText;
+                UpdateFull();
+            }
+        }
+
+        private void scoresToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string[] familys = File.ReadAllLines(DirectoryPath + "Data\\FamilyNames.txt");
+
+            StringBuilder sb = new StringBuilder();
+            foreach (string f in familys)
+            {
+                if(attended.ContainsKey(f))
+                {
+                    sb.AppendLine(attended[f]);
+                }
+                else
+                {
+                    sb.AppendLine("0\t0\t0\t0\t0\t0\t0\t0");
+                }
+            }
+
+            textBoxResult.Text = sb.ToString();
+
+            buttonToggleList.Text = "Recent";
+            textBoxResult.BringToFront();
+            fullList = false;
         }
     }
 }
